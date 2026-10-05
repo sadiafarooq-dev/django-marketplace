@@ -23,6 +23,7 @@ def addtowishlist(request):
             return JsonResponse({'status': "No such product found."})
     return JsonResponse({'status': "Invalid request method."}, status=400)
 
+@login_required(login_url='loginpage')
 def deletewishlistitem(request):
     if request.method == 'POST':
         prod_id = int(request.POST.get('product_id'))

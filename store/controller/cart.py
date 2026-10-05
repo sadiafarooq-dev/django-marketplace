@@ -48,19 +48,22 @@ def viewcart(request):
     return render(request, 'store/cart.html', context)
 
 
+@login_required(login_url='loginpage')
 def updatecart(request):
     if request.method == 'POST':
         prod_id = int(request.POST.get('product_id'))
         prod_qty = int(request.POST.get('product_qty'))
         
         # Get the product to check stock
-        product = Product.objects.get(id=prod_id)
+        product = Product.objects.filter(id=prod_id).first()
+        if product is None:
+            return JsonResponse({'status': "Product not found", 'error': True})
         
         if Cart.objects.filter(user=request.user, product_id=prod_id).exists():
             cart = Cart.objects.get(product_id=prod_id, user=request.user)
             
             # Validate stock before updating
-            if prod_qty > product.quantity:
+            if prod_qty < 1 or prod_qty > product.quantity:
                 return JsonResponse({'status': "Out of Stock", 'error': True})
             
             cart.product_qty = prod_qty
@@ -68,6 +71,7 @@ def updatecart(request):
             return JsonResponse({'status': "Quantity updated successfully!"})
     return JsonResponse({'status': "Something went wrong", 'error': True})
 
+@login_required(login_url='loginpage')
 def deletecartitem(request):
     if request.method =='POST':
         prod_id = int(request.POST.get('product_id'))
@@ -75,4 +79,4 @@ def deletecartitem(request):
              cartitem = Cart.objects.get(product_id=prod_id, user=request.user)
              cartitem.delete()
         return JsonResponse({'status': "Item deleted successfully!"})
-    return redirect('/')
+    return redirect('/')

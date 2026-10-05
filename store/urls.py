@@ -4,13 +4,13 @@ from store.views import collectionsview
 from store.controller import authview, cart, wishlist, checkout, order
 
 urlpatterns = [
-    # ✅ Buyer Routes
+    # Buyer Routes
     path('', views.home, name="home"),
 
-    path('collections', views.collections, name="collections"),  # ✅ Main collections view
+    path('collections', views.collections, name="collections"), 
     path('collections/<str:slug>/', collectionsview, name="collectionsview"),
 
-    # ✅ FIX: Add trailing slash here ↓↓↓
+    # 
     path('collections/<str:cate_slug>/<str:prod_slug>/', views.productview, name="productview"),
 
     path('product-list', views.productlistAjax),
@@ -18,12 +18,12 @@ urlpatterns = [
     path("searchproduct", views.search_product, name="searchproduct"),
 
 
-    # ✅ Authentication (Buyer & Seller)
+    # Authentication (Buyer & Seller)
     path('register/', authview.register, name="register"),
     path('login/', authview.loginpage, name="loginpage"),
     path('logout/', authview.logoutpage, name="logoutpage"),
 
-    # ✅ Buyer Features (Cart, Wishlist, Orders)
+    # Buyer Features (Cart, Wishlist, Orders)
     path('add-to-cart', cart.addtocart, name="addtocart"),
     path('cart/', cart.viewcart, name="cart"),
     path('update-cart', cart.updatecart, name="update-cart"),
@@ -41,7 +41,7 @@ urlpatterns = [
     path('invoice/<str:t_no>/', order.download_invoice, name="download_invoice"),
     path('view-order/<str:t_no>', order.vieworder, name="orderview"),
 
-    # ✅ Seller Routes (Dashboard & Product Management)
+    # Seller Routes (Dashboard & Product Management)
     path('seller-home/', views.seller_home, name='seller_home'),
     path('seller-dashboard/', views.seller_dashboard, name="seller_dashboard"),
     path('add-product/', views.add_product, name="add_product"),
@@ -50,4 +50,4 @@ urlpatterns = [
     path('seller-orders/', views.seller_orders, name='seller_orders'),
     path('seller-orders/update-status/<int:order_id>/', views.update_order_status, name='update_order_status'),
 
-]
+] #almost 30

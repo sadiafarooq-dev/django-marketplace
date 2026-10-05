@@ -4,17 +4,27 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load KEY=value pairs from a local .env file (kept out of git) into the environment
+_env_file = BASE_DIR / '.env'
+if _env_file.exists():
+    for _line in _env_file.read_text().splitlines():
+        _line = _line.strip()
+        if _line and not _line.startswith('#') and '=' in _line:
+            _k, _v = _line.split('=', 1)
+            os.environ.setdefault(_k.strip(), _v.strip())
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^ixcr&lo&cpcy6qs*ldsz9fi2t+7$s3opncndj6*gphy_tv6tk'
+# Secrets come from environment variables (see .env.example). The fallback is for local development only.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-dev-only-change-me')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [h for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '127.0.0.1,localhost').split(',') if h]
 
 
 # Application definition
@@ -66,16 +76,26 @@ WSGI_APPLICATION = 'ecommerce.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'djangotest',
-        'HOST': 'localhost',
-        'USER': 'root',
-        'PASSWORD': 'rootpassword',
-        'PORT': '3308',
+# Database: SQLite by default (nothing to install or start).
+# To use MySQL instead, put DB_ENGINE=mysql in your .env file.
+if os.environ.get('DB_ENGINE', 'sqlite').lower() == 'mysql':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': os.environ.get('DB_NAME', 'djangotest'),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'USER': os.environ.get('DB_USER', 'root'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+            'PORT': os.environ.get('DB_PORT', '3306'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -115,14 +135,24 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 MEDIA_URL= '/images/'
-MEDIA_ROOT=BASE_DIR / 'static'
 STATICFILES_DIRS= [
     BASE_DIR / 'static'
 ]
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Where `python manage.py collectstatic` gathers all static files for the live server
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Live site address(es) allowed to submit forms, e.g. https://you.pythonanywhere.com
+CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',') if o]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 # DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'store.CustomUser'
+
+
+# Razorpay (set these in your environment to enable online payment)
+RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID', '')
+RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET', '')

@@ -10,6 +10,4 @@ urlpatterns = [
     path('sellers/approve/<int:seller_id>/', views.approve_seller, name='approve_seller'),
     path('admin/seller/<int:seller_id>/', views.seller_detail_view, name='seller_detail'),
 
-
-
 ]

@@ -16,8 +16,16 @@ def admin_profile(request):
         return redirect('admin_login')
 
     if request.method == "POST":
-        request.user.username = request.POST.get("username")
-        request.user.email = request.POST.get("email")
+        username = (request.POST.get("username") or "").strip()
+        email = (request.POST.get("email") or "").strip()
+        if not username:
+            messages.error(request, "Username cannot be empty.")
+            return redirect('admin_profile')
+        if CustomUser.objects.filter(username=username).exclude(id=request.user.id).exists():
+            messages.error(request, "That username is already taken.")
+            return redirect('admin_profile')
+        request.user.username = username
+        request.user.email = email
         request.user.save()
         messages.success(request, "Profile updated successfully.")
         return redirect('admin_profile')
@@ -134,4 +142,4 @@ def seller_detail_view(request, seller_id):
         'order_items': order_items,
         'customers': customers,
     }
-    return render(request, 'adminpanel/seller_detail.html', context)
+    return render(request, 'adminpanel/seller_detail.html', context)

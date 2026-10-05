@@ -1,0 +1,7 @@
+Django>=4.2,<5.0
+django-jazzmin
+django-extensions
+Pillow
+weasyprint
+razorpay
+# For MySQL instead of SQLite, also install: mysqlclient

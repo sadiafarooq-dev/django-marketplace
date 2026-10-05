@@ -7,24 +7,23 @@ from .forms import ProductForm
 from django.views.decorators.http import require_POST
 
 
-# ✅ Buyer Homepage (Shows Trending Products)
+#  Buyer Homepage (Shows Trending Products)
 def home(request):
     trending_products = Product.objects.filter(trending=True, status=True)  # Public trending products
     return render(request, "store/index.html", {'trending_products': trending_products})
 
-# ✅ Buyer Collections View
+#  Buyer Collections View
 def collections(request):
     category = Category.objects.filter(status=0)  # Show active categories
     return render(request, "store/collections.html", {'category': category})
 
-# ✅ Buyer Collection Products View (Only Public Products)
+#  Buyer Collection Products View (Only Public Products)
 def collectionsview(request, slug):
     category = get_object_or_404(Category, slug=slug, status=0)
     products = Product.objects.filter(category=category, status=True)
     return render(request, 'store/products/index.html', {'products': products, 'category': category})
 
-# ✅ Buyer Product Detail View
-# ✅ Buyer Product Detail View
+# Buyer Product Detail View
 def productview(request, cate_slug, prod_slug):
     category = get_object_or_404(Category, slug=cate_slug)
     product = get_object_or_404(Product, category=category, slug=prod_slug, status=True)
@@ -54,16 +53,19 @@ def productlistAjax(request):
     return JsonResponse(product_names, safe=False)
 
 
-# ✅ Product Search for Buyers
+#  Product Search for Buyers
 def search_product(request):
-    query = request.GET.get('term')
+    query = (request.GET.get('term') or '').strip()
+    if not query:
+        return redirect("/")
     try:
         product = Product.objects.get(name__iexact=query)
         return redirect(product.get_absolute_url())
-    except Product.DoesNotExist:
+    except (Product.DoesNotExist, Product.MultipleObjectsReturned):
         return redirect("/")  # or render a 'no result found' page
 
-# # ✅ Seller Home
+#  Seller Home
+@login_required(login_url='loginpage')
 def seller_home(request):
     if request.user.role != 'seller':
         return redirect('home')
@@ -73,7 +75,7 @@ def seller_home(request):
 
 
 
-# ✅ Seller Dashboard - Manages Their Own Products
+# Seller Dashboard - Manages Their Own Products
 @login_required(login_url='loginpage')
 def seller_dashboard(request):
     if request.user.role != 'seller' or not request.user.is_seller_approved:
@@ -85,7 +87,7 @@ def seller_dashboard(request):
 
 
 
-# ✅ Seller Adds a New Product
+#  Seller Adds a New Product
 @login_required(login_url='loginpage')
 def add_product(request):
     if request.user.role != 'seller' or not request.user.is_seller_approved:
@@ -127,7 +129,7 @@ def edit_product(request, product_id):
 
 
 
-# ✅ Seller Deletes Their Own Product
+#  Seller Deletes Their Own Product
 @login_required(login_url='loginpage')
 def delete_product(request, product_id):
     if request.user.role != 'seller' or not request.user.is_seller_approved:
@@ -168,8 +170,9 @@ def update_order_status(request, order_id):
 
     order = get_object_or_404(Order, id=order_id)
     
-    # Optional: extra safety — make sure this seller has any items in this order
-    if not OrderItem.objects.filter(order=order, product__seller=request.user).exists():
+    # A seller may only change the status of an order whose items are ALL theirs
+    items = OrderItem.objects.filter(order=order)
+    if not items.exists() or items.exclude(product__seller=request.user).exists():
         messages.error(request, "You are not authorized to update this order.")
         return redirect('seller_orders')
 

@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 import datetime
 import os
 from django.urls import reverse
+from django.utils.text import slugify
 
 
 # Custom User Model with Buyer/Seller Role
@@ -14,7 +15,7 @@ class CustomUser(AbstractUser):
     ]
     
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='buyer')
-    is_seller_approved = models.BooleanField(default=False)  # ✅ Add this line
+    is_seller_approved = models.BooleanField(default=False) 
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
 
@@ -35,10 +36,10 @@ def get_file_path(request, filename):
 # Category Model
 class Category(models.Model):
     name = models.CharField(max_length=150, unique=True)
-    slug = models.SlugField(max_length=150, unique=True, blank=True)  # ✅ SlugField with auto generation
+    slug = models.SlugField(max_length=150, unique=True, blank=True)  #  SlugField with auto generation
     image = models.ImageField(upload_to=get_file_path, null=True, blank=True)
     description = models.TextField(max_length=500)
-    status = models.BooleanField(default=False)  # Hidden or visible
+    status = models.BooleanField(default=False)  # NOTE: for categories, False (0) = visible, True = hidden
     trending = models.BooleanField(default=False)
     meta_title = models.CharField(max_length=150)
     meta_keywords = models.CharField(max_length=150)
@@ -71,8 +72,8 @@ class Product(models.Model):
     description = models.TextField(max_length=500)
     original_price = models.FloatField()
     selling_price = models.FloatField()
-    status = models.BooleanField(default=False, help_text="0-default, 1-Hidden")
-    trending = models.BooleanField(default=False, help_text="0-default, 1-Trending")
+    status = models.BooleanField(default=False, help_text="Checked = visible in the shop")
+    trending = models.BooleanField(default=False, help_text="Checked = shown in Trending")
     tag = models.CharField(max_length=150)
     meta_title = models.CharField(max_length=150, default="Default Title")
     meta_keywords = models.CharField(max_length=150, default="default,keywords")

@@ -33,15 +33,14 @@ $(document).ready(function () {
         success: function (response) {
           // console.log(response);
           var options = {
-            key: "YOUR_KEY_ID",
-            amount: 1 * 100,
+            key: response.key_id,
+            amount: Math.round(response.total_price * 100),
             currency: "INR",
             name: "Sadia Shop",
             description: "Test Transaction",
             image: "https://example.com/your_logo",
             // order_id: "order_9A33XWu170gUtm",
             handler: function (responseb) {
-              alert(responseb.razorpay_payment_id);
               data = {
                 fname: fname,
                 lname: lname,

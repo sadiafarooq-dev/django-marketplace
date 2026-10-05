@@ -2,7 +2,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from .models import CustomUser, Product  # Import CustomUser & Product model
 
-# ✅ Custom User Registration Form (Buyer/Seller Role Selection)
+# Custom User Registration Form (Buyer/Seller Role Selection)
 class CustomUserForm(UserCreationForm):
     ROLE_CHOICES = [
         ('buyer', 'Buyer'),
@@ -31,22 +31,21 @@ class CustomUserForm(UserCreationForm):
         model = CustomUser  # Using CustomUser model with roles
         fields = ['username', 'email', 'password1', 'password2', 'role']
 
-# ✅ Product Management Form for Sellers
+# Product Management Form for Sellers
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = [
-            'category', 'seller', 'slug', 'name', 'product_image',
+            'category', 'slug', 'name', 'product_image',
             'small_description', 'quantity', 'description', 'original_price',
             'selling_price', 'status', 'trending', 'tag', 
             'meta_title', 'meta_keywords', 'meta_description'
         ]
         widgets = {
-            'seller': forms.HiddenInput(), 
-            'tags': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter product tags'}),
+            'tag': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter product tags'}),
             'trending': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'status': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'meta_title': forms.TextInput(attrs={'class': 'form-control'}),
             'meta_keywords': forms.TextInput(attrs={'class': 'form-control'}),
             'meta_description': forms.Textarea(attrs={'class': 'form-control'}),
-        }
+        }
